@@ -1,0 +1,19 @@
+<html lang="einn-US">
+    <head>
+        <meta charset="utf-8">
+        <title>My test page</title>
+    </head>
+    <body>
+    <p>Guess the number! </p>
+    <p>{{ message }} </p>
+        <form action="" method="get" class="form-example">
+            <div class="form-example">
+                <label for="email">Enter your estimate: </label>
+                <input type="number" name="number" id="number" required>
+            </div>
+            <div class="form-example">
+                <input type="submit" value="submit">
+            </div>
+        </form>
+    </body>
+</html>
