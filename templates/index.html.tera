@@ -5,7 +5,16 @@
     </head>
     <body>
     <p>Guess the number! </p>
-    <p>{{ message }} </p>
+    <ul>
+        {% for student in students %}
+        <li>
+            <form class="link" action="/students/{{student.id}}" method="post">
+              <input type="hidden" name="_method" value="put" />
+              <button class="link" type="submit">{{ student.name }}</button>
+            </form>
+          </li>
+        {% endfor %}
+    </ul>
         <form action="" method="get" class="form-example">
             <div class="form-example">
                 <label for="email">Enter your estimate: </label>

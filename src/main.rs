@@ -1,35 +1,39 @@
 #[macro_use] extern crate rocket;
+extern crate rocket_contrib;
+extern crate diesel;
+
 extern crate rocket_dyn_templates;
-
 use rocket_dyn_templates::{Template, context};
-use std::cmp::Ordering;
+use diesel::{prelude::*};
+use dotenvy::dotenv;
 
-static SECRET_NUMBER: i32 = 42;
+pub mod schema;
+mod students;
+
+use std::env;
+
+
+pub fn establish_connection_sqlite() -> SqliteConnection {
+    dotenv().ok();
+
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    SqliteConnection::establish(&database_url)
+        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+}
+
 
 #[get("/")]
-fn index() -> Template {
-    Template::render("index", context! { message: "Please input your guess number" })
+async fn index() -> Template {
+    use self::students::Student;
+
+    let conn = &mut establish_connection_sqlite();
+    let results = self::schema::students::dsl::students.load::<Student>(conn).expect("Error loading posts");
+    Template::render("index", context! { students: &results})
 }
-
-#[get("/?<number>")]
-fn index_number(number: i32) -> Template {
-
-    let message = match number.cmp(&SECRET_NUMBER) {
-        Ordering::Less => "Too small!",
-        Ordering::Greater => "Too big!",
-        Ordering::Equal => {
-            "You win!"
-        }
-    };
-
-
-    Template::render("index_number", context! { message: message, guessed_number: number})
-}
-
 
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, index_number])
         .attach(Template::fairing())
+        .mount("/", routes![index])
 }
