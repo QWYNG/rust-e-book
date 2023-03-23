@@ -18,3 +18,4 @@ create table historys (
    foreign key (course_id) references course(id) );
 
 insert into students values(1, 'Yamada', null);
+insert into courses values(1, 'network security', null);

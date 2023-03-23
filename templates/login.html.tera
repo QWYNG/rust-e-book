@@ -1,0 +1,17 @@
+<html lang="einn-US">
+    <head>
+        <meta charset="utf-8">
+        <title>My test page</title>
+    </head>
+    <body>
+        <form action="/login" method="post" class="form-example">
+            <div class="form-example">
+              <label for="name">Enter your name: </label>
+              <input type="text" name="name" id="name" required>
+            </div>
+            <div class="form-example">
+              <input type="submit" value="login">
+            </div>
+          </form>          
+    </body>
+</html>
