@@ -1,7 +1,8 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
+use crate::schema::courses;
 
-#[derive(Queryable, Serialize, Deserialize)]
+#[derive(Identifiable, Selectable, Queryable, Serialize, Deserialize)]
 #[diesel(table_name = courses)]
 pub struct Course {
     pub id: i32,

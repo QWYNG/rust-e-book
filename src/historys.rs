@@ -1,17 +1,20 @@
 use crate::courses::Course;
-use crate::schema::historys;
+use crate::schema::{historys, courses, students};
 use crate::students::Student;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Serialize, Deserialize, Associations)]
-#[diesel(belongs_to(Course))]
-#[diesel(belongs_to(Student))]
+joinable!(historys -> students(student_id));
+joinable!(historys -> courses(course_id));
+
+#[derive(Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug)]
+#[diesel(belongs_to(Course, foreign_key = course_id))]
+#[diesel(belongs_to(Student, foreign_key = student_id))]
 #[diesel(table_name = historys)]
 pub struct History {
     pub id: i32,
-    course_id: i32,
-    student_id: i32,
+    pub course_id: i32,
+    pub student_id: i32,
     pub date: String,
     pub score: i32,
 }

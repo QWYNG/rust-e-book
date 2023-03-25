@@ -19,3 +19,5 @@ create table historys (
 
 insert into students values(1, 'Yamada', null);
 insert into courses values(1, 'network security', null);
+insert into courses values(2, 'function programing', null);
+insert into historys values(1, 1, 1, '2023-03-01', 50);

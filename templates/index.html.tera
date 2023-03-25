@@ -5,14 +5,21 @@
     </head>
     <body>
     <ul>
-      <p> welcome! {{ student.name }} </p>
-        {% for course in courses %}
-        <li>
+        <p> welcome! {{ student.name }} </p>
+        <a href="not_complete_courses">新規履修</a>
+        {% for history_with_course in historys_with_course %}
+            {%  set history = history_with_course[0] %}
+            {%  set course = history_with_course[1] %}
+            <li>
             <form class="link" action="/students/{{course.id}}" method="post">
-              <b>{{ course.name }}</b>
-              <input type="datetime-local" id="meeting-time" value="2018-06-12T19:30">
-              <input type="number" id="grade" min="0" max="100">       
-              <button class="link" type="submit">Submit</button>
+                <b>{{ course.name }}</b>
+                <br>
+                <div>終了日: {{ history.date }}</div>
+                <div>成績: {{ history.score }}</div>
+
+                <input type="datetime-local" id="meeting-time" value="2018-06-12T19:30", required>
+                <input type="number" id="grade" min="0" max="100", placeholder="成績", required>
+              <button class="link" type="submit">再履修</button>
             </form>
           </li>
         {% endfor %}
