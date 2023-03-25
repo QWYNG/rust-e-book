@@ -4,8 +4,10 @@ extern crate diesel;
 extern crate rocket_contrib;
 extern crate rocket_dyn_templates;
 
-use diesel::prelude::*;
+use courses::Course;
+use diesel::{prelude::*, associations::HasTable};
 use dotenvy::dotenv;
+use historys::History;
 use rocket::{form::Form, response::Redirect};
 use rocket_dyn_templates::{context, Template};
 
@@ -24,7 +26,7 @@ pub fn establish_connection_sqlite() -> SqliteConnection {
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-#[get("/index/<student_name>")]
+#[get("/<student_name>/index")]
 async fn index(student_name: String) -> Template {
     use self::schema::courses::dsl::*;
     use self::schema::students::dsl::*;
@@ -44,6 +46,28 @@ async fn index(student_name: String) -> Template {
     Template::render(
         "index",
         context! { student: &student, courses: &courses_results},
+    )
+}
+
+#[get("/<student_name>/not_complete_courses")]
+async fn not_complete_courses(student_name: String) -> Template {
+    use self::courses::Course;
+    use self::students::Student;
+    use self::historys::History;
+
+    let conn = &mut establish_connection_sqlite();
+
+    let student = crate::schema::students::dsl::students
+        .filter(self::schema::students::dsl::name.eq(student_name))
+        .first::<Student>(conn)
+        .expect("error loading student");
+
+    let joins = crate::schema::historys::table.left_join(crate::schema::courses::table).load::<(Course, History)>(conn);
+    
+
+    Template::render(
+        "not_complete_courses",
+        context! { student: &student, courses: &joins},
     )
 }
 
@@ -76,5 +100,5 @@ async fn post_login(user_form: Form<UserForm>) -> Redirect {
 fn rocket() -> _ {
     rocket::build()
         .attach(Template::fairing())
-        .mount("/", routes![login, post_login, index])
+        .mount("/", routes![login, post_login, index, not_complete_courses])
 }

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[diesel(belongs_to(Course))]
 #[diesel(belongs_to(Student))]
 #[diesel(table_name = historys)]
-pub struct Historys {
+pub struct History {
     pub id: i32,
     course_id: i32,
     student_id: i32,

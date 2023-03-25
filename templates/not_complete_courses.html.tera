@@ -1,0 +1,21 @@
+<html lang="einn-US">
+    <head>
+        <meta charset="utf-8">
+        <title>My test page</title>
+    </head>
+    <body>
+    <ul>
+      <p> welcome! {{ student.name }} </p>
+        {% for course in courses %}
+        <li>
+            <form class="link" action="/students/{{course.id}}" method="post">
+              <b>{{ course.name }}</b>
+              <input type="datetime-local" id="meeting-time" value="2018-06-12T19:30">
+              <input type="number" id="grade" min="0" max="100">       
+              <button class="link" type="submit">Submit</button>
+            </form>
+          </li>
+        {% endfor %}
+    </ul>
+    </body>
+</html>
