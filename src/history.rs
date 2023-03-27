@@ -1,13 +1,15 @@
-use crate::courses::Course;
-use crate::schema::{historys, courses, students};
-use crate::students::Student;
+use crate::course::Course;
+use crate::schema::{courses, historys, students};
+use crate::student::Student;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
 joinable!(historys -> students(student_id));
 joinable!(historys -> courses(course_id));
 
-#[derive(Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug)]
+#[derive(
+    Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug,
+)]
 #[diesel(belongs_to(Course, foreign_key = course_id))]
 #[diesel(belongs_to(Student, foreign_key = student_id))]
 #[diesel(table_name = historys)]

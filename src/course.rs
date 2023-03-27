@@ -1,6 +1,6 @@
+use crate::schema::courses;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::schema::courses;
 
 #[derive(Identifiable, Selectable, Queryable, Serialize, Deserialize)]
 #[diesel(table_name = courses)]

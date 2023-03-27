@@ -1,30 +1,22 @@
 #[macro_use]
 extern crate rocket;
+extern crate core;
 extern crate diesel;
 extern crate rocket_contrib;
 extern crate rocket_dyn_templates;
-extern crate core;
 
-use core::num::dec2flt::number::Number;
-use std::collections::HashMap;
 use diesel::prelude::*;
 use dotenvy::dotenv;
-use historys::History;
+use history::History;
 use rocket::{form::Form, response::Redirect};
 use rocket_dyn_templates::{context, Template};
 
-mod courses;
-mod historys;
+mod course;
+mod history;
 mod schema;
-mod students;
+mod student;
 
 use std::env;
-use std::ptr::null;
-use rocket_sync_db_pools::diesel::insert_into;
-use rocket_sync_db_pools::diesel::query_builder::InsertStatement;
-use crate::courses::Course;
-use crate::schema::courses::dsl::courses;
-use crate::schema::historys::{course_id, score, student_id};
 
 pub fn establish_connection_sqlite() -> SqliteConnection {
     dotenv().ok();
@@ -37,10 +29,9 @@ pub fn establish_connection_sqlite() -> SqliteConnection {
 #[get("/<student_name>/index")]
 async fn index(student_name: String) -> Template {
     use self::schema::students::dsl::*;
-    use self::schema::historys::dsl::*;
 
-    use self::courses::Course;
-    use self::students::Student;
+    use self::course::Course;
+    use self::student::Student;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -52,7 +43,8 @@ async fn index(student_name: String) -> Template {
     let historys_with_course: Vec<(History, Course)> = History::belonging_to(&student)
         .inner_join(self::schema::courses::table)
         .select((History::as_select(), Course::as_select()))
-        .load(conn).expect("error");
+        .load(conn)
+        .expect("error");
 
     Template::render(
         "index",
@@ -63,10 +55,8 @@ async fn index(student_name: String) -> Template {
 #[get("/<student_name>/not_complete_courses")]
 async fn not_complete_courses(student_name: String) -> Template {
     use self::schema::students::dsl::*;
-    use self::schema::historys::dsl::*;
-
-    use self::courses::Course;
-    use self::students::Student;
+    use self::course::Course;
+    use self::student::Student;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -79,7 +69,8 @@ async fn not_complete_courses(student_name: String) -> Template {
         .left_join(self::schema::historys::table)
         .filter(self::schema::historys::id.is_null())
         .select(Course::as_select())
-        .load::<Course>(conn).expect("error");
+        .load::<Course>(conn)
+        .expect("error");
 
     Template::render(
         "not_complete_courses",
@@ -93,14 +84,17 @@ struct HistoryForm {
     score: i32,
 }
 
-#[post("/<student_name>/<course_id>"), data = "<history_form>")]
-async fn create_history(history_form: Form<HistoryForm>) -> Redirect {
-    use self::schema::students::dsl::*;
+#[post("/<student_name>/<course_id>", data = "<history_form>")]
+async fn create_history(
+    student_name: String,
+    course_id: i32,
+    history_form: Form<HistoryForm>,
+) -> Redirect {
     use self::schema::courses::dsl::*;
-    use self::schema::historys::dsl::*;
+    use self::schema::students::dsl::*;
 
-    use self::students::Student;
-    let user_name = &user_form.name;
+    use self::course::Course;
+    use self::student::Student;
 
     let conn = &mut establish_connection_sqlite();
     let student = students
@@ -113,7 +107,15 @@ async fn create_history(history_form: Form<HistoryForm>) -> Redirect {
         .first::<Course>(conn)
         .expect("error loading course");
 
-    insert_into(users).values(((course_id.eq(course.id), student_id.eq(student.id)), date.eq(&history_form.date), score.eq(&history_form.score))).execute(conn).expect("error insert");
+    diesel::insert_into(self::schema::historys::table)
+        .values((
+            self::schema::historys::dsl::course_id.eq(&course.id),
+            self::schema::historys::dsl::student_id.eq(&student.id),
+            self::schema::historys::dsl::date.eq(&history_form.date),
+            self::schema::historys::dsl::score.eq(&history_form.score),
+        ))
+        .execute(conn)
+        .expect("error insert");
 
     Redirect::to(uri!(_, index(student.name)))
 }
@@ -131,7 +133,7 @@ struct UserForm {
 #[post("/login", data = "<user_form>")]
 async fn post_login(user_form: Form<UserForm>) -> Redirect {
     use self::schema::students::dsl::*;
-    use self::students::Student;
+    use self::student::Student;
     let user_name = &user_form.name;
 
     let conn = &mut establish_connection_sqlite();
@@ -145,7 +147,14 @@ async fn post_login(user_form: Form<UserForm>) -> Redirect {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build()
-        .attach(Template::fairing())
-        .mount("/", routes![login, post_login, index, not_complete_courses, create_history])
+    rocket::build().attach(Template::fairing()).mount(
+        "/",
+        routes![
+            login,
+            post_login,
+            index,
+            not_complete_courses,
+            create_history
+        ],
+    )
 }

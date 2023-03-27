@@ -1,6 +1,6 @@
+use crate::schema::students;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::schema::students;
 
 #[derive(Identifiable, Queryable, Serialize, Deserialize)]
 #[diesel(table_name = students)]
