@@ -1,0 +1,22 @@
+<html lang="einn-US">
+    <head>
+        <meta charset="utf-8">
+        <title>My test page</title>
+    </head>
+    <body>
+    <ul>
+      <p> welcome! {{ student.name }} </p>
+      <p> 未履修の科目一覧 </p>
+        {% for course in not_complete_courses %}
+        <li>
+          <form class="link" action="/{{student.name}}/{{course.id}}" method="post">
+            <b>{{ course.name }}</b>
+            <input type="datetime-local" id="date" name="date" value="2018-06-12T19:30", required>
+            <input type="number" id="score" name="score" min="0" max="100" placeholder="成績", required>
+            <button class="link" type="submit">履修</button>
+          </form>
+        </li>
+        {% endfor %}
+    </ul>
+    </body>
+</html>

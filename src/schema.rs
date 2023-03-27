@@ -1,5 +1,6 @@
 // @generated automatically by Diesel CLI.
 
+use diesel::joinable;
 diesel::table! {
     courses (id) {
         id -> Integer,
@@ -26,8 +27,4 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(
-    courses,
-    historys,
-    students,
-);
+diesel::allow_tables_to_appear_in_same_query!(courses, historys, students,);
