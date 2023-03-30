@@ -120,7 +120,7 @@ async fn create_history(
     Redirect::to(uri!(_, index(student.name)))
 }
 
-#[get("/login")]
+#[get("/")]
 async fn login() -> Template {
     Template::render("login", context! {})
 }
