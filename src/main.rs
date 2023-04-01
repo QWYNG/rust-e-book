@@ -54,8 +54,8 @@ async fn index(student_name: String) -> Template {
 
 #[get("/<student_name>/not_complete_courses")]
 async fn not_complete_courses(student_name: String) -> Template {
-    use self::schema::students::dsl::*;
     use self::course::Course;
+    use self::schema::students::dsl::*;
     use self::student::Student;
 
     let conn = &mut establish_connection_sqlite();
