@@ -1,6 +1,15 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    chapters (id) {
+        id -> Integer,
+        course_id -> Integer,
+        name -> Text,
+        content -> Text,
+    }
+}
+
+diesel::table! {
     courses (id) {
         id -> Integer,
         name -> Text,
@@ -26,4 +35,9 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(courses, historys, students,);
+diesel::allow_tables_to_appear_in_same_query!(
+    chapters,
+    courses,
+    historys,
+    students,
+);
