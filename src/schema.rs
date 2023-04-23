@@ -28,6 +28,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    mentors (id) {
+        id -> Integer,
+        name -> Text,
+    }
+}
+
+diesel::table! {
     students (id) {
         id -> Integer,
         name -> Text,
@@ -39,5 +46,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     chapters,
     courses,
     historys,
+    mentors,
     students,
 );

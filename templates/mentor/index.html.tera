@@ -1,0 +1,15 @@
+<html lang="einn-US">
+    <head>
+        <meta charset="utf-8">
+        <title>My test page</title>
+    </head>
+    <body>
+    <ul>
+        <p> welcome! {{ mentor.name }} </p>
+        <p> 生徒一覧 </p>
+        {% for student in students %}
+            <li><a href="/{{student.name}}/index">{{ student.name }}</a></li>
+        {% endfor %}
+    </ul>
+    </body>
+</html>

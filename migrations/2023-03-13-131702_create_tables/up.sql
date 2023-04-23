@@ -3,6 +3,10 @@ create table students (
    name text not null,
    pw text);  /*未使用 */
 
+create table mentors (
+   id integer primary key autoincrement not null,
+   name text not null);
+
 create table courses (
    id integer primary key autoincrement not null,
    name text not null,
@@ -25,6 +29,7 @@ create table chapters (
    foreign key (course_id) references course(id) );
 
 insert into students values(1, 'Yamada', null);
+insert into mentors values(1, 'Tanaka');
 insert into courses values(1, 'rust programing', null);
 insert into courses values(2, 'function programing', null);
 insert into chapters values(1, 1, '基本データ型', 'content');

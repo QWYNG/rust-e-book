@@ -15,6 +15,7 @@ mod course;
 mod history;
 mod schema;
 mod student;
+mod mentor;
 
 use std::env;
 
@@ -49,6 +50,27 @@ async fn index(student_name: String) -> Template {
     Template::render(
         "index",
         context! { student: &student, historys_with_course: historys_with_course},
+    )
+}
+
+#[get("/<mentor_name>/mentor_index")]
+async fn mentor_index(mentor_name: String) -> Template {
+    use self::schema::mentors::dsl::*;
+
+    use self::student::Student;
+    use self::mentor::Mentor;
+
+    let conn = &mut establish_connection_sqlite();
+
+    let mentor = mentors
+        .filter(self::schema::mentors::dsl::name.eq(mentor_name))
+        .first::<Mentor>(conn)
+        .expect("error loading mentor");
+    let students = self::schema::students::table.select(Student::as_select()).load::<Student>(conn).expect("error");
+
+    Template::render(
+        "mentor/index",
+        context! { mentor: &mentor, students: students }
     )
 }
 
@@ -145,6 +167,21 @@ async fn post_login(user_form: Form<UserForm>) -> Redirect {
     Redirect::to(uri!(_, index(student.name)))
 }
 
+#[post("/mentor_login", data = "<user_form>")]
+async fn post_mentor_login(user_form: Form<UserForm>) -> Redirect {
+    use self::schema::mentors::dsl::*;
+    use self::mentor::Mentor;
+    let user_name = &user_form.name;
+
+    let conn = &mut establish_connection_sqlite();
+    let mentor = mentors
+        .filter(name.eq(user_name))
+        .first::<Mentor>(conn)
+        .expect("Error loading mentors");
+
+    Redirect::to(uri!(_, mentor_index(mentor.name)))
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build().attach(Template::fairing()).mount(
@@ -152,7 +189,9 @@ fn rocket() -> _ {
         routes![
             login,
             post_login,
+            post_mentor_login,
             index,
+            mentor_index,
             not_complete_courses,
             create_history
         ],
