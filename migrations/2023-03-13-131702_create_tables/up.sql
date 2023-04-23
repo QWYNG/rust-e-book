@@ -40,6 +40,25 @@ create table questions (
    content text not null,
    foreign key (exam_id) references exam(id) );
 
+create table question_historys (
+   id integer primary key autoincrement not null,
+   question_id integer not null,
+   student_id integer not null,
+   correct boolean not null,
+   foreign key (question_id) references question(id)
+   foreign key (student_id) references student(id)
+);
+
+create table exam_historys (
+   id integer primary key autoincrement not null,
+   exam_id integer not null,
+   student_id integer not null,
+   start_datetime text not null,
+   end_datetime text not null,
+   foreign key (exam_id) references exam(id)
+   foreign key (student_id) references student(id)
+);
+
 insert into students values(1, 'Yamada', null);
 insert into mentors values(1, 'Tanaka');
 insert into courses values(1, 'rust programing', null);
