@@ -28,6 +28,18 @@ create table chapters (
    content text not null,
    foreign key (course_id) references course(id) );
 
+create table exams (
+   id integer primary key autoincrement not null,
+   course_id integer not null,
+   name text not null,
+   foreign key (course_id) references course(id) );
+
+create table questions (
+   id integer primary key autoincrement not null,
+   exam_id integer not null,
+   content text not null,
+   foreign key (exam_id) references exam(id) );
+
 insert into students values(1, 'Yamada', null);
 insert into mentors values(1, 'Tanaka');
 insert into courses values(1, 'rust programing', null);
@@ -35,3 +47,5 @@ insert into courses values(2, 'function programing', null);
 insert into chapters values(1, 1, '基本データ型', 'content');
 insert into chapters values(2, 1, '構造体と列挙', 'content');
 insert into historys values(1, 1, 1, '2023-03-01', 50);
+insert into exams values(1, 1, 'データ型試験');
+insert into questions values(1, 1, '4要素の配列を作成し、その中に0~9までのランダムな値を格納しなさい');

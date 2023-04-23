@@ -16,6 +16,8 @@ mod history;
 mod schema;
 mod student;
 mod mentor;
+mod exam;
+mod question;
 
 use std::env;
 
