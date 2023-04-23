@@ -1,0 +1,7 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>0</x><y>320</y><w>100</w><h>30</h></coordinates><panel_attributes>Student</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>0</x><y>480</y><w>100</w><h>30</h></coordinates><panel_attributes>Course</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>220</x><y>490</y><w>100</w><h>30</h></coordinates><panel_attributes>Chapter</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>220</x><y>580</y><w>100</w><h>30</h></coordinates><panel_attributes>Exam</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>490</y><w>150</w><h>120</h></coordinates><panel_attributes>lt=-
+m1=0..n
+m2=1
+</panel_attributes><additional_attributes>130;100;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>90</x><y>480</y><w>150</w><h>60</h></coordinates><panel_attributes>lt=-
+m1=0..n
+m2=1
+</panel_attributes><additional_attributes>130;30;10;20</additional_attributes></element></diagram>
