@@ -12,6 +12,7 @@ use rocket::{form::Form, response::Redirect};
 use rocket_dyn_templates::{context, Template};
 
 mod course;
+mod chapter;
 mod history;
 mod schema;
 mod student;
@@ -52,6 +53,35 @@ async fn index(student_name: String) -> Template {
     Template::render(
         "index",
         context! { student: &student, historys_with_course: historys_with_course},
+    )
+}
+
+#[get("/<student_name>/<course_id>/show")]
+async fn course_show(student_name: String, course_id: i32) -> Template {
+    use self::schema::students::dsl::*;
+
+    use self::course::Course;
+    use self::student::Student;
+    use self::chapter::Chapter;
+    use self::exam::Exam;
+
+    let conn = &mut establish_connection_sqlite();
+
+    let student = students
+        .filter(self::schema::students::dsl::name.eq(student_name))
+        .first::<Student>(conn)
+        .expect("error loading student");
+
+    let course = self::schema::courses::table
+        .filter(self::schema::courses::dsl::id.eq(course_id))
+        .first::<Course>(conn)
+        .expect("error loading course");
+    let chapters = Chapter::belonging_to(&course).select(Chapter::as_select()).load::<Chapter>(conn).expect("error loading chapters");
+    let exams = Exam::belonging_to(&course).select(exam::Exam::as_select()).load::<exam::Exam>(conn).expect("error loading exams");
+
+    Template::render(
+        "course/show",
+        context! { student: &student, course: &course, chapters: &chapters, exams: &exams},
     )
 }
 

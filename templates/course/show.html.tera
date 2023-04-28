@@ -1,0 +1,19 @@
+<html lang="einn-US">
+    <head>
+        <meta charset="utf-8">
+        <title>My test page</title>
+    </head>
+    <body>
+    <ul>
+        {% for chapter in chapters %}
+            <li> {{ chapter.name }} </li>
+        {% endfor %}
+
+        {% for exam in exams %}
+        <li>
+            <a href="/exam/{{ exam.id }}">{{ exam.name }}</a>
+         </li>
+        {% endfor %}
+    </ul>
+    </body>
+</html>
