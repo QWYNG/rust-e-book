@@ -7,7 +7,7 @@
     <ul>
         <p> welcome! {{ student.name }} </p>
         <a href="not_complete_courses">新規履修</a>
-        {% for history_with_course in historys_with_course %}
+        {% for history_with_course in histories_with_course %}
             {%  set history = history_with_course[0] %}
             {%  set course = history_with_course[1] %}
             <li>

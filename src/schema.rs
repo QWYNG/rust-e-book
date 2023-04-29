@@ -18,7 +18,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    exam_historys (id) {
+    exam_histories (id) {
         id -> Integer,
         exam_id -> Integer,
         student_id -> Integer,
@@ -36,7 +36,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    historys (id) {
+    histories (id) {
         id -> Integer,
         student_id -> Integer,
         course_id -> Integer,
@@ -53,7 +53,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    question_historys (id) {
+    question_histories (id) {
         id -> Integer,
         question_id -> Integer,
         student_id -> Integer,
@@ -80,11 +80,11 @@ diesel::table! {
 diesel::allow_tables_to_appear_in_same_query!(
     chapters,
     courses,
-    exam_historys,
+    exam_histories,
     exams,
-    historys,
+    histories,
     mentors,
-    question_historys,
+    question_histories,
     questions,
     students,
 );

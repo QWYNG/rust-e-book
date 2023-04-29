@@ -14,7 +14,7 @@ use rocket_dyn_templates::{context, Template};
 mod chapter;
 mod course;
 mod exam;
-mod exam__history;
+mod exam_history;
 mod history;
 mod mentor;
 mod question;
@@ -46,7 +46,7 @@ async fn index(student_name: String) -> Template {
         .first::<Student>(conn)
         .expect("error loading student");
 
-    let historys_with_course: Vec<(History, Course)> = History::belonging_to(&student)
+    let histories_with_course: Vec<(History, Course)> = History::belonging_to(&student)
         .inner_join(self::schema::courses::table)
         .select((History::as_select(), Course::as_select()))
         .load(conn)
@@ -54,7 +54,7 @@ async fn index(student_name: String) -> Template {
 
     Template::render(
         "index",
-        context! { student: &student, historys_with_course: historys_with_course},
+        context! { student: &student, histories_with_course: histories_with_course},
     )
 }
 
@@ -166,8 +166,8 @@ async fn not_complete_courses(student_name: String) -> Template {
         .expect("error loading student");
 
     let not_complete_courses = self::schema::courses::table
-        .left_join(self::schema::historys::table)
-        .filter(self::schema::historys::id.is_null())
+        .left_join(self::schema::histories::table)
+        .filter(self::schema::histories::id.is_null())
         .select(Course::as_select())
         .load::<Course>(conn)
         .expect("error");
@@ -207,12 +207,12 @@ async fn create_history(
         .first::<Course>(conn)
         .expect("error loading course");
 
-    diesel::insert_into(self::schema::historys::table)
+    diesel::insert_into(self::schema::histories::table)
         .values((
-            self::schema::historys::dsl::course_id.eq(&course.id),
-            self::schema::historys::dsl::student_id.eq(&student.id),
-            self::schema::historys::dsl::date.eq(&history_form.date),
-            self::schema::historys::dsl::score.eq(&history_form.score),
+            self::schema::histories::dsl::course_id.eq(&course.id),
+            self::schema::histories::dsl::student_id.eq(&student.id),
+            self::schema::histories::dsl::date.eq(&history_form.date),
+            self::schema::histories::dsl::score.eq(&history_form.score),
         ))
         .execute(conn)
         .expect("error insert");

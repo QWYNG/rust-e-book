@@ -12,7 +12,7 @@ create table courses (
    name text not null,
    tutor text); /* 未使用 */
 
-create table historys (
+create table histories (
    id integer primary key autoincrement not null,
    student_id integer not null,
    course_id integer not null,
@@ -40,7 +40,7 @@ create table questions (
    content text not null,
    foreign key (exam_id) references exam(id) );
 
-create table question_historys (
+create table question_histories (
    id integer primary key autoincrement not null,
    question_id integer not null,
    student_id integer not null,
@@ -49,7 +49,7 @@ create table question_historys (
    foreign key (student_id) references student(id)
 );
 
-create table exam_historys (
+create table exam_histories (
    id integer primary key autoincrement not null,
    exam_id integer not null,
    student_id integer not null,
@@ -65,6 +65,6 @@ insert into courses values(1, 'rust programing', null);
 insert into courses values(2, 'function programing', null);
 insert into chapters values(1, 1, '基本データ型', 'content');
 insert into chapters values(2, 1, '構造体と列挙', 'content');
-insert into historys values(1, 1, 1, '2023-03-01', 50);
+insert into histories values(1, 1, 1, '2023-03-01', 50);
 insert into exams values(1, 1, 'データ型試験');
 insert into questions values(1, 1, '4要素の配列を作成し、その中に0~9までのランダムな値を格納しなさい');
