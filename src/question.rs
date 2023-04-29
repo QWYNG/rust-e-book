@@ -1,3 +1,4 @@
+use crate::exam::Exam;
 use crate::schema::exams;
 use crate::schema::questions;
 use diesel::prelude::*;
@@ -5,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 joinable!(questions -> exams(exam_id));
 
-#[derive(Identifiable, Selectable, Queryable, Serialize, Deserialize)]
+#[derive(Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations)]
 #[diesel(table_name = questions)]
 #[diesel(belongs_to(Exam, foreign_key = exam_id))]
 pub struct Question {

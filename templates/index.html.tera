@@ -12,7 +12,7 @@
             {%  set course = history_with_course[1] %}
             <li>
             <form class="link" action="/students/{{course.id}}" method="post">
-                <b>{{ course.name }}</b>
+                <a href="/{{student.name}}/{{course.id}}/show">{{ course.name }}</a>
                 <br>
                 <div>終了日: {{ history.date }}</div>
                 <div>成績: {{ history.score }}</div>

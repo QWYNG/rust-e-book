@@ -1,0 +1,15 @@
+<html lang="einn-US">
+    <head>
+        <meta charset="utf-8">
+        <title>{{exam.name}}</title>
+    </head>
+    <body>
+    <ul>
+        {% for question in questions %}
+            <li>
+                {{question.content}}
+          </li>
+        {% endfor %}
+    </ul>
+    </body>
+</html>

@@ -93,6 +93,41 @@ async fn course_show(student_name: String, course_id: i32) -> Template {
     )
 }
 
+#[get("/<student_name>/<course_id>/<exam_id>/show")]
+async fn exam_show(student_name: String, course_id: i32, exam_id: i32) -> Template {
+    use self::schema::students::dsl::*;
+
+    use self::course::Course;
+    use self::exam::Exam;
+    use self::question::Question;
+    use self::student::Student;
+
+    let conn = &mut establish_connection_sqlite();
+
+    let student = students
+        .filter(self::schema::students::dsl::name.eq(student_name))
+        .first::<Student>(conn)
+        .expect("error loading student");
+
+    let course = self::schema::courses::table
+        .filter(self::schema::courses::dsl::id.eq(course_id))
+        .first::<Course>(conn)
+        .expect("error loading course");
+    let exam = self::schema::exams::table
+        .filter(self::schema::exams::dsl::id.eq(exam_id))
+        .first::<Exam>(conn)
+        .expect("error loading exam");
+    let questions = Question::belonging_to(&exam)
+        .select(Question::as_select())
+        .load::<Question>(conn)
+        .expect("error loading questions");
+
+    Template::render(
+        "exam/show",
+        context! { student: &student, course: &course, exam: &exam, questions: &questions},
+    )
+}
+
 #[get("/<mentor_name>/mentor_index")]
 async fn mentor_index(mentor_name: String) -> Template {
     use self::schema::mentors::dsl::*;
@@ -233,6 +268,8 @@ fn rocket() -> _ {
             login,
             post_login,
             post_mentor_login,
+            course_show,
+            exam_show,
             index,
             mentor_index,
             not_complete_courses,
