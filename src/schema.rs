@@ -23,7 +23,8 @@ diesel::table! {
         exam_id -> Integer,
         student_id -> Integer,
         start_datetime -> Text,
-        end_datetime -> Text,
+        end_datetime -> Nullable<Text>,
+        score -> Nullable<Integer>,
     }
 }
 

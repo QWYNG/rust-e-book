@@ -47,6 +47,7 @@ create table question_histories (
    correct boolean not null,
    foreign key (question_id) references question(id)
    foreign key (student_id) references student(id)
+   UNIQUE (question_id, student_id)
 );
 
 create table exam_histories (
@@ -54,9 +55,11 @@ create table exam_histories (
    exam_id integer not null,
    student_id integer not null,
    start_datetime text not null,
-   end_datetime text not null,
+   end_datetime text,
+   score integer,
    foreign key (exam_id) references exam(id)
    foreign key (student_id) references student(id)
+   UNIQUE (exam_id, student_id)
 );
 
 insert into students values(1, 'Yamada', null);

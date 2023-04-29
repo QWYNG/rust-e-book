@@ -5,6 +5,7 @@ extern crate diesel;
 extern crate rocket_contrib;
 extern crate rocket_dyn_templates;
 
+use chrono::prelude::*;
 use diesel::prelude::*;
 use dotenvy::dotenv;
 use history::History;
@@ -101,6 +102,7 @@ async fn exam_show(student_name: String, course_id: i32, exam_id: i32) -> Templa
     use self::exam::Exam;
     use self::question::Question;
     use self::student::Student;
+    use crate::exam_history::ExamHistory;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -121,6 +123,20 @@ async fn exam_show(student_name: String, course_id: i32, exam_id: i32) -> Templa
         .select(Question::as_select())
         .load::<Question>(conn)
         .expect("error loading questions");
+
+    diesel::insert_into(self::schema::exam_histories::table)
+        .values((
+            self::schema::exam_histories::exam_id.eq(&exam.id),
+            self::schema::exam_histories::student_id.eq(&student.id),
+            self::schema::exam_histories::start_datetime.eq(Utc::now().to_string()),
+        ))
+        .on_conflict((
+            self::schema::exam_histories::exam_id,
+            self::schema::exam_histories::student_id,
+        ))
+        .do_nothing()
+        .execute(conn)
+        .expect("error insert");
 
     Template::render(
         "exam/show",
@@ -220,6 +236,90 @@ async fn create_history(
     Redirect::to(uri!(_, index(student.name)))
 }
 
+#[derive(FromForm)]
+struct QuestionAnswerForm {
+    correct: bool,
+}
+
+#[post(
+    "/<student_name>/<course_id>/<exam_id>/<question_id>/answer",
+    data = "<question_answer_form>"
+)]
+async fn answer_question(
+    student_name: String,
+    course_id: i32,
+    exam_id: i32,
+    question_id: i32,
+    question_answer_form: Form<QuestionAnswerForm>,
+) -> Redirect {
+    use self::schema::students::dsl::*;
+
+    use self::exam::Exam;
+    use self::question::Question;
+    use self::question_history::QuestionHistory;
+    use self::student::Student;
+    use self::exam_history::ExamHistory;
+
+    let conn = &mut establish_connection_sqlite();
+    let student = students
+        .filter(self::schema::students::dsl::name.eq(student_name))
+        .first::<Student>(conn)
+        .expect("error loading student");
+
+    let exam = self::schema::exams::dsl::exams
+        .filter(self::schema::exams::dsl::id.eq(exam_id))
+        .first::<Exam>(conn)
+        .expect("error loading exam");
+
+    let question = self::schema::questions::dsl::questions
+        .filter(self::schema::questions::dsl::id.eq(question_id))
+        .first::<Question>(conn)
+        .expect("error loading question");
+
+    diesel::insert_into(self::schema::question_histories::dsl::question_histories)
+        .values((
+            self::schema::question_histories::question_id.eq(&question.id),
+            self::schema::question_histories::student_id.eq(&student.id),
+            self::schema::question_histories::correct.eq(&question_answer_form.correct),
+        ))
+        .on_conflict((self::schema::question_histories::question_id, self::schema::question_histories::student_id))
+        .do_update()
+        .set(self::schema::question_histories::correct.eq(&question_answer_form.correct))
+        .execute(conn)
+        .expect("error insert");
+
+    let question_histories_result = self::schema::question_histories::table
+        .filter(self::schema::question_histories::student_id.eq(&student.id))
+        .filter(self::schema::question_histories::question_id.eq(&question.id))
+        .load::<QuestionHistory>(conn)
+        .expect("error loading question histories");
+    let questions_result = self::schema::questions::table
+        .filter(self::schema::questions::exam_id.eq(&exam.id))
+        .load::<Question>(conn)
+        .expect("error loading questions");
+
+    println!("question_histories_result.len(): {} question_result: {}", question_histories_result.len(), questions_result.len());
+
+    if question_histories_result.len() == questions_result.len() {
+        let exam_history_result = self::schema::exam_histories::table
+            .filter(self::schema::exam_histories::student_id.eq(&student.id))
+            .filter(self::schema::exam_histories::exam_id.eq(&exam.id))
+            .first::<ExamHistory>(conn)
+            .expect("error loading exam histories");
+        
+        diesel::update(&exam_history_result).set((
+                self::schema::exam_histories::score.eq(question_histories_result
+                    .iter()
+                    .filter(|question_history_result| question_history_result.correct)
+                    .count() as i32),
+                self::schema::exam_histories::end_datetime.eq(Utc::now().to_string()),
+            ))
+            .execute(conn)
+            .expect("error insert");
+    }
+    Redirect::to(uri!(_, exam_show(student.name, course_id, exam_id)))
+}
+
 #[get("/")]
 async fn login() -> Template {
     Template::render("login", context! {})
@@ -273,7 +373,8 @@ fn rocket() -> _ {
             index,
             mentor_index,
             not_complete_courses,
-            create_history
+            create_history,
+            answer_question
         ],
     )
 }

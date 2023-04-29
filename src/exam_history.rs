@@ -10,7 +10,7 @@ joinable!(exam_histories -> students(student_id));
 joinable!(exam_histories -> exams(exam_id));
 
 #[derive(
-    Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug,
+    Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug, AsChangeset
 )]
 #[diesel(belongs_to(Exam, foreign_key = exam_id))]
 #[diesel(belongs_to(Student, foreign_key = student_id))]
@@ -20,5 +20,6 @@ pub struct ExamHistory {
     pub exam_id: i32,
     pub student_id: i32,
     pub start_datetime: String,
-    pub end_datetime: String,
+    pub end_datetime: Option<String>,
+    pub score: Option<i32>,
 }

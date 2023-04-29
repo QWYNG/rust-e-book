@@ -8,6 +8,11 @@
         {% for question in questions %}
             <li>
                 {{question.content}}
+                <form class="link" action="/{{student.name}}/{{course.id}}/{{exam.id}}//{{question.id}}/answer" method="post">
+                    <input type="checkbox" id="correct" name="correct">
+                    <label for="correct">正解</label>
+                  <button class="link" type="submit">回答</button>
+                </form>    
           </li>
         {% endfor %}
     </ul>
