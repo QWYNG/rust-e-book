@@ -11,14 +11,16 @@ use history::History;
 use rocket::{form::Form, response::Redirect};
 use rocket_dyn_templates::{context, Template};
 
-mod course;
 mod chapter;
+mod course;
+mod exam;
+mod exam__history;
 mod history;
+mod mentor;
+mod question;
+mod question_history;
 mod schema;
 mod student;
-mod mentor;
-mod exam;
-mod question;
 
 use std::env;
 
@@ -60,10 +62,10 @@ async fn index(student_name: String) -> Template {
 async fn course_show(student_name: String, course_id: i32) -> Template {
     use self::schema::students::dsl::*;
 
-    use self::course::Course;
-    use self::student::Student;
     use self::chapter::Chapter;
+    use self::course::Course;
     use self::exam::Exam;
+    use self::student::Student;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -76,8 +78,14 @@ async fn course_show(student_name: String, course_id: i32) -> Template {
         .filter(self::schema::courses::dsl::id.eq(course_id))
         .first::<Course>(conn)
         .expect("error loading course");
-    let chapters = Chapter::belonging_to(&course).select(Chapter::as_select()).load::<Chapter>(conn).expect("error loading chapters");
-    let exams = Exam::belonging_to(&course).select(exam::Exam::as_select()).load::<exam::Exam>(conn).expect("error loading exams");
+    let chapters = Chapter::belonging_to(&course)
+        .select(Chapter::as_select())
+        .load::<Chapter>(conn)
+        .expect("error loading chapters");
+    let exams = Exam::belonging_to(&course)
+        .select(exam::Exam::as_select())
+        .load::<exam::Exam>(conn)
+        .expect("error loading exams");
 
     Template::render(
         "course/show",
@@ -89,8 +97,8 @@ async fn course_show(student_name: String, course_id: i32) -> Template {
 async fn mentor_index(mentor_name: String) -> Template {
     use self::schema::mentors::dsl::*;
 
-    use self::student::Student;
     use self::mentor::Mentor;
+    use self::student::Student;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -98,11 +106,14 @@ async fn mentor_index(mentor_name: String) -> Template {
         .filter(self::schema::mentors::dsl::name.eq(mentor_name))
         .first::<Mentor>(conn)
         .expect("error loading mentor");
-    let students = self::schema::students::table.select(Student::as_select()).load::<Student>(conn).expect("error");
+    let students = self::schema::students::table
+        .select(Student::as_select())
+        .load::<Student>(conn)
+        .expect("error");
 
     Template::render(
         "mentor/index",
-        context! { mentor: &mentor, students: students }
+        context! { mentor: &mentor, students: students },
     )
 }
 
@@ -201,8 +212,8 @@ async fn post_login(user_form: Form<UserForm>) -> Redirect {
 
 #[post("/mentor_login", data = "<user_form>")]
 async fn post_mentor_login(user_form: Form<UserForm>) -> Redirect {
-    use self::schema::mentors::dsl::*;
     use self::mentor::Mentor;
+    use self::schema::mentors::dsl::*;
     let user_name = &user_form.name;
 
     let conn = &mut establish_connection_sqlite();

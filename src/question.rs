@@ -1,5 +1,5 @@
-use crate::schema::questions;
 use crate::schema::exams;
+use crate::schema::questions;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 

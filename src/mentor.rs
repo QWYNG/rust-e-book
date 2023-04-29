@@ -6,5 +6,5 @@ use serde::{Deserialize, Serialize};
 #[diesel(table_name = mentors)]
 pub struct Mentor {
     pub id: i32,
-    pub name: String
+    pub name: String,
 }
