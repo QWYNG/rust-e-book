@@ -9,10 +9,16 @@
             <li> {{ chapter.name }} </li>
         {% endfor %}
 
-        {% for exam in exams %}
+        {% for exam_with_history in exams_with_history %}
+        {%  set history = exam_with_history[0] %}
+        {%  set exam = exam_with_history[1] %}
+
         <li>
             <a href="/{{student.name}}/{{course.id}}/{{exam.id}}/show">{{ exam.name }}</a>
-         </li>
+            <div>開始日 {{history.start_datetime}}</div>
+            <div>終了日 {{history.end_datetime}}</div>    
+        </li>
+
         {% endfor %}
     </ul>
     </body>

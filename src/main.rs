@@ -67,6 +67,7 @@ async fn course_show(student_name: String, course_id: i32) -> Template {
     use self::course::Course;
     use self::exam::Exam;
     use self::student::Student;
+    use crate::exam_history::ExamHistory;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -83,14 +84,18 @@ async fn course_show(student_name: String, course_id: i32) -> Template {
         .select(Chapter::as_select())
         .load::<Chapter>(conn)
         .expect("error loading chapters");
-    let exams = Exam::belonging_to(&course)
-        .select(exam::Exam::as_select())
-        .load::<exam::Exam>(conn)
+    let exams_with_history: Vec<(ExamHistory, Exam)> = ExamHistory::belonging_to(&student)
+        .inner_join(self::schema::exams::table)
+        .select((
+            exam_history::ExamHistory::as_select(),
+            exam::Exam::as_select(),
+        ))
+        .load(conn)
         .expect("error loading exams");
 
     Template::render(
         "course/show",
-        context! { student: &student, course: &course, chapters: &chapters, exams: &exams},
+        context! { student: &student, course: &course, chapters: &chapters, exams_with_history: &exams_with_history},
     )
 }
 
@@ -102,7 +107,6 @@ async fn exam_show(student_name: String, course_id: i32, exam_id: i32) -> Templa
     use self::exam::Exam;
     use self::question::Question;
     use self::student::Student;
-    use crate::exam_history::ExamHistory;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -255,10 +259,10 @@ async fn answer_question(
     use self::schema::students::dsl::*;
 
     use self::exam::Exam;
+    use self::exam_history::ExamHistory;
     use self::question::Question;
     use self::question_history::QuestionHistory;
     use self::student::Student;
-    use self::exam_history::ExamHistory;
 
     let conn = &mut establish_connection_sqlite();
     let student = students
@@ -282,7 +286,10 @@ async fn answer_question(
             self::schema::question_histories::student_id.eq(&student.id),
             self::schema::question_histories::correct.eq(&question_answer_form.correct),
         ))
-        .on_conflict((self::schema::question_histories::question_id, self::schema::question_histories::student_id))
+        .on_conflict((
+            self::schema::question_histories::question_id,
+            self::schema::question_histories::student_id,
+        ))
         .do_update()
         .set(self::schema::question_histories::correct.eq(&question_answer_form.correct))
         .execute(conn)
@@ -298,7 +305,11 @@ async fn answer_question(
         .load::<Question>(conn)
         .expect("error loading questions");
 
-    println!("question_histories_result.len(): {} question_result: {}", question_histories_result.len(), questions_result.len());
+    println!(
+        "question_histories_result.len(): {} question_result: {}",
+        question_histories_result.len(),
+        questions_result.len()
+    );
 
     if question_histories_result.len() == questions_result.len() {
         let exam_history_result = self::schema::exam_histories::table
@@ -306,8 +317,9 @@ async fn answer_question(
             .filter(self::schema::exam_histories::exam_id.eq(&exam.id))
             .first::<ExamHistory>(conn)
             .expect("error loading exam histories");
-        
-        diesel::update(&exam_history_result).set((
+
+        diesel::update(&exam_history_result)
+            .set((
                 self::schema::exam_histories::score.eq(question_histories_result
                     .iter()
                     .filter(|question_history_result| question_history_result.correct)

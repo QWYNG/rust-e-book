@@ -10,7 +10,15 @@ joinable!(question_histories -> students(student_id));
 joinable!(question_histories -> questions(question_id));
 
 #[derive(
-    Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug, AsChangeset
+    Identifiable,
+    Selectable,
+    Queryable,
+    Serialize,
+    Deserialize,
+    Associations,
+    PartialEq,
+    Debug,
+    AsChangeset,
 )]
 #[diesel(belongs_to(Question, foreign_key = question_id))]
 #[diesel(belongs_to(Student, foreign_key = student_id))]

@@ -10,7 +10,15 @@ joinable!(exam_histories -> students(student_id));
 joinable!(exam_histories -> exams(exam_id));
 
 #[derive(
-    Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug, AsChangeset
+    Identifiable,
+    Selectable,
+    Queryable,
+    Serialize,
+    Deserialize,
+    Associations,
+    PartialEq,
+    Debug,
+    AsChangeset,
 )]
 #[diesel(belongs_to(Exam, foreign_key = exam_id))]
 #[diesel(belongs_to(Student, foreign_key = student_id))]
