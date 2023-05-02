@@ -1,9 +1,7 @@
 use crate::course::Course;
-use crate::schema::{chapters, courses};
+use crate::schema::chapters;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-
-joinable!(chapters -> courses(course_id));
 
 #[derive(
     Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug,

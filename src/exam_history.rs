@@ -1,13 +1,6 @@
-use crate::{
-    exam::Exam,
-    schema::{exam_histories, exams, students},
-    student::Student,
-};
+use crate::{exam::Exam, schema::exam_histories, student::Student};
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-
-joinable!(exam_histories -> students(student_id));
-joinable!(exam_histories -> exams(exam_id));
 
 #[derive(
     Identifiable,

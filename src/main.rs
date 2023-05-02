@@ -5,6 +5,8 @@ extern crate diesel;
 extern crate rocket_contrib;
 extern crate rocket_dyn_templates;
 
+use std::env;
+
 use chrono::prelude::*;
 use diesel::prelude::*;
 use dotenvy::dotenv;
@@ -22,8 +24,6 @@ mod question;
 mod question_history;
 mod schema;
 mod student;
-
-use std::env;
 
 pub fn establish_connection_sqlite() -> SqliteConnection {
     dotenv().ok();
@@ -67,7 +67,6 @@ async fn course_show(student_name: String, course_id: i32) -> Template {
     use self::course::Course;
     use self::exam::Exam;
     use self::student::Student;
-    use crate::exam_history::ExamHistory;
 
     let conn = &mut establish_connection_sqlite();
 
@@ -84,14 +83,23 @@ async fn course_show(student_name: String, course_id: i32) -> Template {
         .select(Chapter::as_select())
         .load::<Chapter>(conn)
         .expect("error loading chapters");
-    let exams_with_history: Vec<(ExamHistory, Exam)> = ExamHistory::belonging_to(&student)
-        .inner_join(self::schema::exams::table)
-        .select((
-            exam_history::ExamHistory::as_select(),
-            exam::Exam::as_select(),
-        ))
-        .load(conn)
-        .expect("error loading exams");
+    let exams_with_history: Vec<(Exam, Option<String>, Option<String>, Option<i32>)> =
+        self::schema::exams::table
+            .left_join(self::schema::exam_histories::table)
+            .filter(self::schema::exams::dsl::course_id.eq(course_id))
+            .filter(
+                self::schema::exam_histories::dsl::student_id
+                    .eq(student.id)
+                    .or(self::schema::exam_histories::dsl::student_id.is_null()),
+            )
+            .select((
+                Exam::as_select(),
+                self::schema::exam_histories::start_datetime.nullable(),
+                self::schema::exam_histories::end_datetime.nullable(),
+                self::schema::exam_histories::score.nullable(),
+            ))
+            .load(conn)
+            .expect("error loading exams");
 
     Template::render(
         "course/show",
@@ -295,21 +303,23 @@ async fn answer_question(
         .execute(conn)
         .expect("error insert");
 
-    let question_histories_result = self::schema::question_histories::table
-        .filter(self::schema::question_histories::student_id.eq(&student.id))
-        .filter(self::schema::question_histories::question_id.eq(&question.id))
-        .load::<QuestionHistory>(conn)
-        .expect("error loading question histories");
     let questions_result = self::schema::questions::table
         .filter(self::schema::questions::exam_id.eq(&exam.id))
         .load::<Question>(conn)
         .expect("error loading questions");
 
-    println!(
-        "question_histories_result.len(): {} question_result: {}",
-        question_histories_result.len(),
-        questions_result.len()
-    );
+    let question_histories_result = self::schema::question_histories::table
+        .filter(self::schema::question_histories::student_id.eq(&student.id))
+        .filter(
+            self::schema::question_histories::question_id.eq_any(
+                questions_result
+                    .iter()
+                    .map(|question_result| question_result.id)
+                    .collect::<Vec<i32>>(),
+            ),
+        )
+        .load::<QuestionHistory>(conn)
+        .expect("error loading question histories");
 
     if question_histories_result.len() == questions_result.len() {
         let exam_history_result = self::schema::exam_histories::table

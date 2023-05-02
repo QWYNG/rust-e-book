@@ -10,13 +10,22 @@
         {% endfor %}
 
         {% for exam_with_history in exams_with_history %}
-        {%  set history = exam_with_history[0] %}
-        {%  set exam = exam_with_history[1] %}
+        {%  set exam = exam_with_history.0 %}
+        {%  set start_datetime = exam_with_history.1 %}
+        {%  set end_datetime = exam_with_history.2 %}
+        {%  set score = exam_with_history.3 %}
 
         <li>
             <a href="/{{student.name}}/{{course.id}}/{{exam.id}}/show">{{ exam.name }}</a>
-            <div>開始日 {{history.start_datetime}}</div>
-            <div>終了日 {{history.end_datetime}}</div>    
+            {% if start_datetime %}
+            <div>開始日 {{start_datetime}}</div>
+            {% endif %}
+            {% if end_datetime %}
+            <div>終了日 {{end_datetime}}</div>  
+            {% endif %}
+            {% if score %}
+            <div>点数 {{score}}</div>
+            {% endif %}
         </li>
 
         {% endfor %}

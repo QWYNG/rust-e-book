@@ -1,11 +1,8 @@
 use crate::course::Course;
-use crate::schema::{courses, histories, students};
+use crate::schema::histories;
 use crate::student::Student;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-
-joinable!(histories -> students(student_id));
-joinable!(histories -> courses(course_id));
 
 #[derive(
     Identifiable, Selectable, Queryable, Serialize, Deserialize, Associations, PartialEq, Debug,
