@@ -78,6 +78,16 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(chapters -> courses (course_id));
+diesel::joinable!(exam_histories -> exams (exam_id));
+diesel::joinable!(exam_histories -> students (student_id));
+diesel::joinable!(exams -> courses (course_id));
+diesel::joinable!(histories -> courses (course_id));
+diesel::joinable!(histories -> students (student_id));
+diesel::joinable!(question_histories -> questions (question_id));
+diesel::joinable!(question_histories -> students (student_id));
+diesel::joinable!(questions -> exams (exam_id));
+
 diesel::allow_tables_to_appear_in_same_query!(
     chapters,
     courses,

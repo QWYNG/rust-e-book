@@ -18,35 +18,35 @@ create table histories (
    course_id integer not null,
    date  text not null,
    score  integer default 0 not null,
-   foreign key (student_id) references student(id),
-   foreign key (course_id) references course(id) );
+   foreign key (student_id) references students(id),
+   foreign key (course_id) references courses(id) );
 
 create table chapters (
    id integer primary key autoincrement not null,
    course_id integer not null,
    name text not null,
    content text not null,
-   foreign key (course_id) references course(id) );
+   foreign key (course_id) references courses(id) );
 
 create table exams (
    id integer primary key autoincrement not null,
    course_id integer not null,
    name text not null,
-   foreign key (course_id) references course(id) );
+   foreign key (course_id) references courses(id) );
 
 create table questions (
    id integer primary key autoincrement not null,
    exam_id integer not null,
    content text not null,
-   foreign key (exam_id) references exam(id) );
+   foreign key (exam_id) references exams(id) );
 
 create table question_histories (
    id integer primary key autoincrement not null,
    question_id integer not null,
    student_id integer not null,
    correct boolean not null,
-   foreign key (question_id) references question(id)
-   foreign key (student_id) references student(id)
+   foreign key (question_id) references questions(id)
+   foreign key (student_id) references students(id)
    UNIQUE (question_id, student_id)
 );
 
@@ -57,8 +57,8 @@ create table exam_histories (
    start_datetime text not null,
    end_datetime text,
    score integer,
-   foreign key (exam_id) references exam(id)
-   foreign key (student_id) references student(id)
+   foreign key (exam_id) references exams(id)
+   foreign key (student_id) references students(id)
    UNIQUE (exam_id, student_id)
 );
 
